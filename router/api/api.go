@@ -111,7 +111,7 @@ func wordCut(c *gin.Context) {
 }
 
 func welcome(c *gin.Context) {
-	c.JSON(200, result.Success("welcome to gofound"))
+	c.JSON(200, result.Success("welcome"))
 }
 
 func removeIndex(c *gin.Context) {

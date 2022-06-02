@@ -15,7 +15,7 @@ import (
 func main() {
 
 	var addr string
-	flag.StringVar(&addr, "addr", "127.0.0.1:5678", "设置监听地址和端口")
+	flag.StringVar(&addr, "addr", ":5678", "设置监听地址和端口")
 
 	var dataDir string
 
