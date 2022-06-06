@@ -10,6 +10,7 @@ import (
 	"QueryEngine/searcher/utils"
 	"QueryEngine/tree"
 	"encoding/csv"
+	"path/filepath"
 
 	"fmt"
 	"log"
@@ -56,7 +57,8 @@ type Engine struct {
 	isDebug bool
 
 	// 是否初始化数据集，程序第一次运行时开启
-	InitDateset bool
+	// InitDateset bool
+	DatasetDir string
 }
 
 type Option struct {
@@ -77,7 +79,10 @@ func NewUInt32ComparatorTree() *tree.Tree {
 
 func (e *Engine) Init() {
 	e.Add(1)
-	defer e.Done()
+
+	// 在下面 L.134 行关闭，否则可能造成死锁
+	// defer e.Done()
+
 	//线程数=cpu数
 	runtime.GOMAXPROCS(runtime.NumCPU() * 2)
 	//保持和gin一致
@@ -128,10 +133,11 @@ func (e *Engine) Init() {
 		e.IdKeyMapperStorages = append(e.IdKeyMapperStorages, iks)
 	}
 
-	if e.InitDateset {
-		log.Printf("正在加载目录 %s 中的数据集.\n", e.DatasetPath)
+	e.Done()
+
+	// if e.InitDateset {
+	if e.DatasetDir != "" {
 		e.LoadDataset()
-		log.Println("加载数据集完成.")
 	}
 
 	log.Println("初始化完成")
@@ -141,30 +147,55 @@ func (e *Engine) Init() {
 }
 
 func (e *Engine) LoadDataset() {
-	f, err := os.Open(e.DatasetPath + "wukong50k_release.csv")
+	var files []string
+	var walkFunc = func(path string, info os.FileInfo, err error) error {
+		if !info.IsDir() {
+			files = append(files, path)
+		}
+		//fmt.Printf("%s\n", path)
+		return nil
+	}
+	err := filepath.Walk(e.DatasetDir, walkFunc)
+
 	if err != nil {
 		fmt.Println(err)
 	}
-	defer f.Close()
-	reader := csv.NewReader(f)
-	record, _ := reader.ReadAll()
 
-	for i, rec := range record {
-		doc := &model.IndexDoc{
-			Id:   uint32(i),
-			Text: rec[1],
-			Document: map[string]interface{}{
-				"Url":     rec[0],
-				"Caption": rec[1],
-			},
+	for _, file := range files {
+		log.Printf("正在加载数据集 %s\n", file)
+		f, err := os.Open(file)
+		if err != nil {
+			fmt.Println(err)
 		}
-		e.IndexDocument(*doc)
+		defer f.Close()
+		reader := csv.NewReader(f)
+		record, _ := reader.ReadAll()
 
-		// FIXME: 只能加载 1009 条记录, 为什么?
-		if i >= 1000 {
-			log.Printf("已加载 %d.\n", i)
-			break
+		k := 0
+		for i, rec := range record {
+			// csv文件，第一行是标题
+			if i == 0 {
+				continue
+			}
+			doc := &model.IndexDoc{
+				Id:   uint32(k),
+				Text: rec[1],
+				Document: map[string]interface{}{
+					"Url":     rec[0],
+					"Caption": rec[1],
+				},
+			}
+			k++
+			e.IndexDocument(*doc)
+
+			// FIXME: 只能加载 1009 条记录, 为什么?
+			// 已修复
+			// if i >= 1000 {
+			// 	log.Printf("已加载 %d.\n", i)
+			// 	// break
+			// }
 		}
+		log.Printf("加载数据集 %s 完成\n", file)
 	}
 }
 
@@ -177,6 +208,7 @@ func (e *Engine) DocumentWorkerExec() {
 	for {
 		doc := <-e.AddDocumentWorkerChan
 		e.AddDocument(&doc)
+		// log.Printf("已处理完%d\n", doc.Id)
 	}
 }
 

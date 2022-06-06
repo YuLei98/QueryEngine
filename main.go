@@ -9,6 +9,8 @@ import (
 	"QueryEngine/router/api"
 	"QueryEngine/searcher"
 
+	admin "QueryEngine/router/admin"
+
 	"github.com/gin-gonic/gin"
 )
 
@@ -27,8 +29,12 @@ func main() {
 	var debug bool
 	flag.BoolVar(&debug, "debug", false, "设置是否开启调试模式")
 
-	var isInitDateset bool
-	flag.BoolVar(&isInitDateset, "initdataset", false, "设置是否初始化数据集")
+	// var isInitDateset bool
+	// flag.BoolVar(&isInitDateset, "initdataset", false, "设置是否初始化数据集")
+
+	// 如果设置了该参数，表示加载dataset文件夹下的数据集
+	var datasetDir string
+	flag.StringVar(&datasetDir, "dataset", "", "设置数据集存储目录")
 
 	flag.Parse()
 
@@ -47,12 +53,13 @@ func main() {
 	}
 
 	//注册api
-	api.Register(router)
+	admin.Register(router)
 
 	var Engine = &searcher.Engine{
 		IndexPath:   dataDir,
 		DatasetPath: "./dataset/",
-		InitDateset: isInitDateset,
+		// InitDateset: isInitDateset,
+		DatasetDir: datasetDir,
 	}
 	option := Engine.GetOptions()
 
