@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>欢迎使用搜索</title>
+    <!-- 引入 layui.css -->
+    <link href="//unpkg.com/layui@2.6.11/dist/css/layui.css" rel="stylesheet">
+
+</head>
+
+<body>
+    <div class="layui-layout layui-layout-admin">
+        <div class="layui-header">
+            <div class="layui-logo layui-hide-xs layui-bg-black">青训营后端</div>
+            <!-- 头部区域（可配合layui 已有的水平导航） -->
+            <ul class="layui-nav layui-layout-left">
+
+            </ul>
+            <ul class="layui-nav layui-layout-right">
+                <li class="layui-nav-item layui-hide layui-show-md-inline-block">
+                    <div href="javascript:;" id="username">
+                        <img src="//tva1.sinaimg.cn/crop.0.0.118.118.180/5db11ff4gw1e77d3nqrv8j203b03cweg.jpg" class="layui-nav-img">
+
+                    </div>
+                    <dl class="layui-nav-child">
+                        <dd><a href="">Your Profile</a></dd>
+                        <dd><a href="">Settings</a></dd>
+                        <dd><a href="">Sign out</a></dd>
+                    </dl>
+                </li>
+                <li class="layui-nav-item" lay-header-event="menuRight" lay-unselect>
+                    <a href="javascript:;">
+                        <i class="layui-icon layui-icon-more-vertical"></i>
+                    </a>
+                </li>
+            </ul>
+        </div>
+
+        <div class="layui-side layui-bg-black">
+            <div class="layui-side-scroll">
+                <!-- 左侧导航区域（可配合layui已有的垂直导航） -->
+                <ul class="layui-nav layui-nav-tree" lay-filter="test">
+                    <li class="layui-nav-item layui-nav-itemed">
+                        <a class="" href="javascript:;">基础功能</a>
+                        <dl class="layui-nav-child">
+                            <dd>
+                                <a id="wu_kong_search" href="javascript:;">悟空数据集搜索</a>
+                            </dd>
+                            <dd>
+                                <a href="javascript:;">自定义数据存储</a>
+                            </dd>
+                            <!-- <dd>
+                                <a href="javascript:;">敏感词过滤</a>
+                            </dd> -->
+                            <dd><a href="http://121.5.218.2:8080/static/ppt.pptx">ppt下载</a></dd>
+                        </dl>
+                    </li>
+                    <li class="layui-nav-item">
+                        <a href="javascript:;">用户自定义管理</a>
+                        <dl class="layui-nav-child">
+                            <dd><a id="user_favorites" href="javascript:;">收藏夹</a></dd>
+                            <dd><a href="javascript:;">其他</a></dd>
+                            <dd><a href="">超链接</a></dd>
+                        </dl>
+                    </li>
+                    <li class="layui-nav-item"><a href="javascript:;">click menu item</a></li>
+                    <li class="layui-nav-item"><a href="">the links</a></li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="layui-body">
+            <!-- 内容主体区域 -->
+            <iframe id="Content_body_area" src="https://v.yuntus.com/tcv/35a9d2b08aacb96838bf63c35f411f408ebe97908ffddc12fbfbcbb1e1f79187" width="100%" height="100%"></iframe>
+            <!-- <div id="Content_body_area" style="padding: 15px;">内容主体区域。记得修改 layui.css 和 js 的路径</div> -->
+        </div>
+
+        <div class="layui-footer">
+            <!-- 底部固定区域 -->
+
+        </div>
+    </div>
+    <!--引入Layui的js库-->
+    <!-- 你的 HTML 代码 -->
+    <script src="//unpkg.com/layui@2.6.11/dist/layui.js"></script>
+    <script>
+        //功能函数
+        //获取指定的cookie值，如果获取不到，得到的就是 undefined
+        function readCookie(tagName) {
+            let arrCk = document.cookie.split(";");
+            let obj = {}
+            for (let i = 0; i <= arrCk.length - 1; i++) {
+                let arrSmall = arrCk[i].trim().split("=");
+                obj[arrSmall[0]] = arrSmall[1];
+            }
+            return obj[tagName];
+        }
+    </script>
+    <script>
+        layui.use(['layer', 'form'], function() {
+            var layer = layui.layer,
+                form = layui.form;
+
+        });
+        // <img src=\"//tva1.sinaimg.cn/crop.0.0.118.118.180/5db11ff4gw1e77d3nqrv8j203b03cweg.jpg\" class=\"layui-nav-img\"> 
+        var con1 = document.getElementById("username");
+        con1.textContent = "用户:" + readCookie("name")
+    </script>
+
+    <!-- <script type="text/javascript">
+        var dom = document.querySelector('.box');
+        var dom1 = document.querySelector('.box1');
+        // 包括padding border
+        console.log(dom.offsetWidth);
+        // 不包括padding border 仅仅是width 这个ie也许有兼容性问题
+        console.log(getComputedStyle(dom).width);
+        // 获取到通过style设置的宽度, 如果是只有类，没有style,那么就获取为空
+        console.log(dom1.style.width);
+    </script> -->
+    <!-- <script>
+        // 手动绑定click
+        window.onload = function() {
+            var all_Element = document.getElementById("wu_kong_search"); // 方式1 a标签.
+            all_Element.onclick = function() {
+                //  <iframe src="http://121.5.218.2:8080/page" width="500px" height="700px"></iframe>
+
+            }
+        }
+            $(document).ready(function(e) {
+        
+        var b1 = document.getElementById("b1");
+        b1.addEventListener("click",function(e){
+
+            var con1 = document.getElementById("con1");
+            var d1 = document.getElementById("d1");       
+            con1.removeChild(d1);
+
+            d1.textContent = "这是重新渲染的d1";        //在这步可根据需要设置该div的属性再添加渲染
+            con1.appendChild(d1); 
+        });
+    </script> -->
+
+    <script>
+        //这里实现点击事件
+        var $ = layui.jquery;
+
+        //用户更新搜索界面
+        $("#wu_kong_search").click(function() {
+            var cur = document.getElementById("Content_body_area")
+            cur.src = "/wu_kong_search"
+            layer.msg(cur.src)
+        })
+
+        //用户收藏夹界面
+        $("#user_favorites").click(function() {
+            var cur = document.getElementById("Content_body_area")
+            cur.src = "/userfavorites"
+                // layer.msg(cur.src)
+        })
+        layer.msg('一个伟大的工程');
+    </script>
+
+</body>
+
+</html>

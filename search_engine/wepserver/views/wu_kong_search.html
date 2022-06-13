@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <title></title>
+    <link rel="stylesheet" ay-data="{height:'full-20'}" type="text/css" href="https://unpkg.com/layui@2.6.11/dist/css/layui.css">
+
+
+    <body>
+        <div class="layui-container">
+            <div class="layui-form-item">
+                <div class="layui-input-block">
+                    <input type="text" id="wu_kong_serach_input" name="title " placeholder="搜索内容 ">
+                    <button type="button" id="Search_button" class="layui-btn layui-btn-sm layui-anim-scaleSpring">搜索</button>
+                    <!-- 2022.6.8 -->
+                    <div id="tips" style="display: none;
+                    width: 179px; border: 1px solid pink ; overflow: auto;" ;>
+                    </div>
+                    <!--2022.6.8   -->
+                </div>
+                <div class="layui-input-block">
+
+                    <input type="text" id="Epigraph_words_input" name="title " placeholder="敏感词 ">
+                    <button type="button" id="Epigraph_words_button" class="layui-btn layui-btn-sm layui-anim-scaleSpring">提交</button>
+
+                </div>
+            </div>
+        </div>
+        <div>
+            <table id="demo" lay-filter="test"> </table>
+        </div>
+
+        <!--引入Layui的js库-->
+        <!-- 你的 HTML 代码 -->
+        <script src="//unpkg.com/layui@2.6.11/dist/layui.js"></script>
+
+    </body>
+
+    <script>
+        //功能函数
+        //获取指定的cookie值，如果获取不到，得到的就是 undefined
+        function readCookie(tagName) {
+            let arrCk = document.cookie.split(";");
+            let obj = {}
+            for (let i = 0; i <= arrCk.length - 1; i++) {
+                let arrSmall = arrCk[i].trim().split("=");
+                obj[arrSmall[0]] = arrSmall[1];
+            }
+            return obj[tagName];
+        }
+    </script>
+
+    <script>
+        layui.use(['table', 'layer'], function() {
+            //获取table对象
+            var table = layui.table;
+
+            //获取jquery对象
+            var $ = layui.jquery;
+            var layer = layui.layer;
+
+            //工具条事件
+            table.on('tool(test)', function(obj) { //注：tool 是工具条事件名，test 是 table 原始容器的属性 lay-filter="对应的值"
+                console.log("cur 行数据 ", obj);
+                var data = obj.data; //获得当前行数据
+                var layEvent = obj.event; //获得 lay-event 对应的值（也可以是表头的 event 参数对应的值）
+                var tr = obj.tr; //获得当前行 tr 的 DOM 对象（如果有的话）
+
+                if (layEvent === 'detail') { //查看
+                    //do somehing
+                } else if (layEvent === 'store') { //删除
+                    layer.confirm('确定要收藏么??', function(index) {
+                        // obj.del(); //删除对应行（tr）的DOM结构，并更新缓存
+                        layer.close(index);
+                        var URL = tr.data.url;
+                        var CAPTION = tr.data.caption;
+                        console.log(data.url, " ", CAPTION)
+                            //向服务端发送删除指令
+                        layui.jquery.ajax({
+                            url: "http://121.5.218.2:8080/dir/add",
+                            type: "post",
+                            data: {
+                                "Username": readCookie("name"),
+                                "Url": data.url,
+                                "Caption": data.caption,
+                            },
+                            success: function(data) {
+                                layer.msg(data.data.Stauts)
+                            },
+                            fail: function(data) {
+                                layer.msg("fail")
+                            }
+
+                        });
+                    });
+                } else if (layEvent === 'LAYTABLE_TIPS') {
+                    layer.alert('Hi，头部工具栏扩展的右侧图标。');
+                }
+
+            });
+        })
+    </script>
+
+
+
+    <script>
+        //点击事件
+        var $ = layui.jquery;
+        /*
+         *功能：点击搜索按钮后的响应
+         *实现：
+         1.获取用户名
+         2.点击搜索框后获取输入框的值
+         3.后端api请求更新该用户要查询的词
+         4.重新渲染table
+         */
+        $("#Search_button").click(function() {
+
+            var input_value = $("#wu_kong_serach_input").val()
+            var username = readCookie("name");
+            layer.msg("你点击了搜索！！！")
+            layui.jquery.ajax({
+                url: "/api/wu_kong_search/updata",
+                type: "put",
+                data: {
+                    "Username": username,
+                    "Sentence": input_value,
+                },
+                success: function(data) {
+                    layer.msg("success")
+                    layui.use(['table', 'layer'], function() {
+                        var table = layui.table;
+                        var URL = "/api/user/search/" + readCookie("name")
+
+
+                        //第一个实例
+                        table.render({
+                            elem: '#demo',
+                            height: 'full-50', //高度最大化减去差值
+
+                            id: "table_datas",
+                            url: URL, //数据接口
+                            page: true, //开启分页
+                            limit: 10,
+                            limits: [10, 20, 30, 40],
+                            request: {
+                                pageName: 'PageNo', //页码的参数名称，默认：page
+                                limitName: 'Limit' //每页数据量的参数名，默认：limit
+                            },
+                            cols: [
+                                [ //表头
+                                    {
+                                        field: 'url',
+                                        title: 'img',
+                                        width: 400,
+                                        height: 234,
+                                        sort: false,
+                                        fixed: 'left',
+                                        templet: function(d) {
+                                            //"< a href="+d.url+" > <img src="+d.url+" > </a>"
+                                            var result = "<a href=" + d.url + " height='500' >" + "<img src=" + d.url + ">" + "</a>"
+                                                //" < img src = " + d.url + " > < /a>"
+                                            return result;
+                                        }
+                                    }, {
+                                        field: 'caption',
+                                        title: 'caption',
+                                        width: 500,
+                                        templet: function(d) {
+                                            var result = "<a>" + d.caption + "</a>"
+                                            return result;
+                                        }
+                                    }, {
+                                        field: 'score',
+                                        title: 'TF-IDF评分',
+                                        width: 100,
+                                        sort: false,
+                                        templet: function(d) {
+                                            // console.log(d);
+                                            return d.score;
+                                        }
+                                    }, {
+                                        title: '操作',
+                                        width: 100,
+                                        sort: false,
+                                        align: "center",
+                                        templet: function(d) {
+                                            //"<button type=\"button\" class=\"layui-btn layui-btn-fluid\">流体按钮（最大化适应）</button>"
+                                            var buts = "<button type=\"button\" class=\"layui-btn layui-btn-sm layui-btn-normal\" lay-event='store'>收藏</button>"
+                                            return buts
+                                        }
+                                    },
+                                ]
+                            ],
+                            parseData: function(d) {
+
+                                return {
+                                    "code": d.code == 200 ? 0 : d.code, //解析接口状态
+                                    "msg": d.code, //解析提示文本
+                                    "count": d.data.count, //解析数据长度
+                                    "data": d.data.datas //解析数据列表
+                                };
+                            }
+                        });
+
+                    });
+                },
+                fail: function(data) {
+
+                    layer.msg("fail")
+                }
+            })
+
+        })
+
+        // 铭感词锅炉
+        $("#Epigraph_words_button").click(function() {
+
+            var text = $("#Epigraph_words_input").val()
+            layer.msg(readCookie("name") + " : " + text)
+            $.ajax({
+                type: 'put',
+                url: '/api/wu_kong_search/Epigraph_words',
+                data: {
+                    'Username': readCookie("name"),
+                    'InputWord': text,
+                },
+                success: function(result) {
+                    layer.msg(readCookie("name") + " :敏感词 " + text + "提交成功 ")
+                }
+            })
+
+        })
+    </script>
+
+
+
+    <!-- 2022.6.8 -->
+    <script>
+        window.onload = function() {
+                //获取文本输入框
+                var textElment = document.getElementById("wu_kong_serach_input");
+                //获button
+                var button = document.querySelector('#Search_button')
+                    //获取下提示框
+                var div = document.getElementById("tips")
+                button.addEventListener('click', () => {
+                    div.style.display = "none"
+                    textElment.value = ''
+                })
+                textElment.onkeyup = function() {
+                    //获取用户输入的值
+                    var text = textElment.value;
+                    //如果文本框中没有值，则下拉框被隐藏，不显示
+                    if (text == "") {
+                        div.style.display = "none";
+                        return;
+                    }
+                    //获取XMLHttpRequest对象
+                    var xhr = new XMLHttpRequest();
+                    //编写回调函数
+                    xhr.onreadystatechange = function() {
+                        //判断回调的条件是否准备齐全
+
+
+                        while (div.hasChildNodes()) //当div下还存在子节点时 循环继续
+                        {
+                            div.removeChild(div.firstChild);
+                        }
+
+                        if (xhr.readyState == 4) {
+                            if (xhr.status == 200) {
+                                //取的服务器端传回的数据
+                                var str = xhr.responseText;
+
+                                //判断传回的数据是否为空,若是则直接返回，不显示
+                                if (str == "") {
+                                    return;
+                                }
+
+
+                                //我们将会在服务器端把数据用 , 隔开，当然这里也可以使用json
+                                var result = JSON.parse(str)
+                                    // console.log(result.data.Datas);
+                                for (let i = 0; i < result.data.Datas.length; i++) {
+                                    let child = document.createElement(`p`)
+                                    child.innerHTML = result.data.Datas[i]
+                                    child.style.border = "1px solid gray"
+                                    div.style.display = 'block'
+                                    div.appendChild(child)
+                                }
+
+                            }
+                        }
+                    }
+
+                    //创建与服务器的连接
+                    xhr.open("GET", "http://121.5.218.2:8080/api/search/tips?Username=ccsu_f&InputWord=" + text);
+
+
+                    //发送
+                    xhr.send();
+                }
+            }
+            //鼠标悬停时改变div的颜色
+        function changeColorwhenMouseover(div) {
+            div.style.backgroundColor = "blue";
+        }
+        //鼠标移出时回复div颜色
+        function recoverColorwhenMouseout(div) {
+            div.style.backgroundColor = "";
+        }
+        //当鼠标带点击div时，将div的值赋给输入文本框
+        function Write(div) {
+            //将div中的值赋给文本框
+            document.getElementById("text").value = div.innerHTML;
+
+            //让下拉提示框消失
+
+            div.parentNode.style.display = "none";
+        }
+    </script>
+    <!-- 2022.6.8 -->
+
+
+    <!--2022.6.10-->
+
+    <!--2022.6.10-->
+
+</html>
+
+</html>

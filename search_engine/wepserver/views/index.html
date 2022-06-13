@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <title></title>
+    <link href="//unpkg.com/layui@2.6.11/dist/css/layui.css" rel="stylesheet">
+
+    <body>
+        <div class="layui-container">
+            <table id="demo" lay-filter="test"> </table>
+        </div>
+
+        <!--引入Layui的js库-->
+        <script src="//unpkg.com/layui@2.6.11/dist/layui.js"></script>
+
+        <script>
+            //功能函数
+            //获取指定的cookie值，如果获取不到，得到的就是 undefined
+            function readCookie(tagName) {
+                let arrCk = document.cookie.split(";");
+                let obj = {}
+                for (let i = 0; i <= arrCk.length - 1; i++) {
+                    let arrSmall = arrCk[i].trim().split("=");
+                    obj[arrSmall[0]] = arrSmall[1];
+                }
+                return obj[tagName];
+            }
+        </script>
+
+        <script type="text/javascript">
+            //加载table模块
+            layui.use(['table', 'layer'], function() {
+                //获取table对象
+                var table = layui.table;
+
+                //获取jquery对象
+                var $ = layui.jquery;
+                var layer = layui.layer;
+                var URL = "http://121.5.218.2:8080/dir/get/" + readCookie("name")
+
+                layer.msg(URL)
+
+
+                //工具条事件
+                table.on('tool(test)', function(obj) { //注：tool 是工具条事件名，test 是 table 原始容器的属性 lay-filter="对应的值"
+                    console.log("cur 行数据 ", obj);
+                    var data = obj.data; //获得当前行数据
+                    var layEvent = obj.event; //获得 lay-event 对应的值（也可以是表头的 event 参数对应的值）
+                    var tr = obj.tr; //获得当前行 tr 的 DOM 对象（如果有的话）
+
+                    if (layEvent === 'detail') { //查看
+                        //do somehing
+                    } else if (layEvent === 'del') { //删除
+                        layer.confirm('真的删除行么', function(index) {
+                            obj.del(); //删除对应行（tr）的DOM结构，并更新缓存
+                            layer.close(index);
+                            console.log("数据:", data)
+                            var username = readCookie("name");
+                            var filename = data.filename
+                                //向服务端发送删除指令
+                            layui.jquery.ajax({
+                                url: "http://121.5.218.2:8080/dir/del",
+                                type: "post",
+                                data: {
+                                    "Username": username,
+                                    "Filename": filename
+                                },
+                                success: function(data) {
+                                    layer.msg(data.data.Stauts)
+                                },
+                                fail: function(data) {
+                                    layer.msg("fail")
+                                }
+
+                            });
+
+                        });
+                    } else if (layEvent === 'edit') { //编辑
+                        //do something
+                        layer.open({
+                            type: 2,
+                            title: '员工跟新',
+                            content: 'emp_updata',
+                            area: ['700px', '600px'],
+                            end: function() {
+                                console.log("添加层关闭了。。。。")
+                                    //数据表的刷新
+                                table.reload('table_datas')
+                            },
+                            success: function(layero, index) {}
+                        });
+
+                    } else if (layEvent === 'LAYTABLE_TIPS') {
+                        layer.alert('Hi，头部工具栏扩展的右侧图标。');
+                    }
+
+                });
+                table.render({
+                    elem: "#demo",
+                    url: URL,
+                    method: "get",
+                    id: 'table_datas',
+                    page: true,
+                    limit: 10,
+                    limits: [10, 20, 30, 40],
+                    request: {
+                        pageName: 'PageNo', //页码的参数名称，默认：page
+                        limitName: 'Limit' //每页数据量的参数名，默认：limit
+                    },
+                    cols: [
+                        [{
+                            field: 'filename',
+                            title: '文件名',
+                            sort: false
+                        }, {
+                            field: 'url',
+                            title: 'url',
+                            sort: false
+                        }, {
+                            field: 'caption',
+                            title: 'caption',
+                            sort: false
+                        }, {
+                            title: '操作',
+                            sort: false,
+                            align: "center",
+                            templet: function(d) {
+                                // "<button type=\"button\" class=\"layui-btn layui-btn-sm layui-btn-normal\" lay-event='del'>删除</button>"
+                                var buts = "<button type=\"button\" class=\"layui-btn layui-btn-sm layui-btn-normal\" lay-event='del'>删除</button>"
+                                buts += "<button type=\"button\" class=\"layui-btn layui-btn-sm layui-btn-normal\" lay-event='edit'>编辑</button>"
+                                return buts
+                            }
+                        }, ]
+                    ],
+
+                    parseData: function(d) {
+
+                        console.log(d);
+
+                        return {
+                            "code": d.code == 200 ? 0 : d.code, //解析接口状态
+                            "msg": d.msg, //解析提示文本
+                            "count": 10, //解析数据长度
+                            "data": d.data.datas //解析数据列表
+                        };
+                    }
+                })
+            })
+        </script>
+    </body>
+
+</html>
