@@ -19,7 +19,7 @@ Linux VM-12-4-ubuntu 5.4.0-109-generic #123-Ubuntu SMP Fri Apr 8 09:10:54 UTC 20
 开机耗时秒：42 cpu核心数: 2
 [GIN-debug] [WARNING] Now Gin requires Go 1.14+.
 ```
-## [项目演示](http://121.5.218.2:8080/)
+## [项目演示(点此跳转)](http://121.5.218.2:8080/)
 
 ## 基础功能：
 ```
@@ -136,9 +136,9 @@ Linux VM-12-4-ubuntu 5.4.0-109-generic #123-Ubuntu SMP Fri Apr 8 09:10:54 UTC 20
 ```
 ## 索引设计
 ### 索引建立
-![索引建立](https://git.acwing.com/ccsu_f/search_engines/-/blob/master/imgs/index00.png)
-![索引描述](https://git.acwing.com/ccsu_f/search_engines/-/blob/master/imgs/index01.png)
-![索引作业](https://git.acwing.com/ccsu_f/search_engines/-/blob/master/imgs/index02.png)
+![索引建立](https://github.com/YuLei98/QueryEngine/blob/main/imgs/index00.png)
+![索引描述](https://github.com/YuLei98/QueryEngine/blob/main/imgs/index01.png)
+![索引作业](https://github.com/YuLei98/QueryEngine/blob/main/imgs/index02.png)
 ### 参考实现
 ```go
 package process
@@ -357,7 +357,7 @@ func (this *Iddexprocess) Index_Qry(str string,info string) (result []model.Item
 ```
 ## 打分算法
 ### TF-IDF介绍
-![tf-idf介绍](https://git.acwing.com/ccsu_f/search_engines/-/blob/master/imgs/doc00.png)
+![tf-idf介绍](https://github.com/YuLei98/QueryEngine/blob/main/imgs/doc00.png)
 ### TF-IDF实现
 ```go
 package process
@@ -385,7 +385,7 @@ func (this *ScorerPrcoss) TF_IDF(tf uint32, numDocs uint64, docFreq uint64) (Sco
 ## 数据分页
 
 ### 分页介绍
-![分页介绍](https://git.acwing.com/ccsu_f/search_engines/-/blob/master/imgs/pa00.png)
+![分页介绍](https://github.com/YuLei98/QueryEngine/blob/main/imgs/pa00.png)
 ### 参考实现
 ```go
 package process
@@ -524,8 +524,8 @@ func (this *Book) Response_QryResPonseData(sentence string,pageId int, limit int
 ```
 ## 性能优化
 ### go的并发
-![如何跑满服务器](https://git.acwing.com/ccsu_f/search_engines/-/blob/master/imgs/go00.png)
-![性能优化思路](https://git.acwing.com/ccsu_f/search_engines/-/blob/master/imgs/go01.png)
+![如何跑满服务器](https://github.com/YuLei98/QueryEngine/blob/main/imgs/go00.png)
+![性能优化思路](https://github.com/YuLei98/QueryEngine/blob/main/imgs/go01.png)
 ### 参考实现
 ```go
 package main
@@ -619,4 +619,4 @@ jieba分词：https://github.com/fxsjy/jieba
 搜索引擎 基本 技术  原理: https://developer.aliyun.com/article/765914
 跳表：https://blog.csdn.net/yjw123456/article/details/105159817/
 ```
-![谢谢 结束！](https://git.acwing.com/ccsu_f/search_engines/-/blob/master/imgs/goend.png)
+![谢谢 结束！](https://github.com/YuLei98/QueryEngine/blob/main/imgs/goend.png)
